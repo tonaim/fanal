@@ -3,11 +3,13 @@ package applier_test
 import (
 	"sort"
 	"testing"
+	"time"
+
+	depTypes "github.com/aquasecurity/go-dep-parser/pkg/types"
 
 	"github.com/aquasecurity/fanal/applier"
 	"github.com/aquasecurity/fanal/cache"
 	"github.com/aquasecurity/fanal/types"
-	depTypes "github.com/aquasecurity/go-dep-parser/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,6 +51,11 @@ func TestApplier_ApplyLayers(t *testing.T) {
 								Family: "debian",
 								Name:   "9.9",
 							},
+							Size: 5590662,
+							LayerHistory: types.LayerHistory{
+								Created:   time.Time{},
+								CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+							},
 							PackageInfos: []types.PackageInfo{
 								{
 									FilePath: "var/lib/dpkg/status.d/tzdata",
@@ -74,6 +81,11 @@ func TestApplier_ApplyLayers(t *testing.T) {
 							SchemaVersion: 1,
 							Digest:        "sha256:dffd9992ca398466a663c87c92cfea2a2db0ae0cf33fcb99da60eec52addbfc5",
 							DiffID:        "sha256:aad63a9339440e7c3e1fff2b988991b9bfb81280042fa7f39a5e327023056819",
+							Size:          5590645,
+							LayerHistory: types.LayerHistory{
+								Created:   time.Time{},
+								CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+							},
 							PackageInfos: []types.PackageInfo{
 								{
 									FilePath: "var/lib/dpkg/status.d/libc6",
@@ -102,6 +114,11 @@ func TestApplier_ApplyLayers(t *testing.T) {
 							SchemaVersion: 1,
 							Digest:        "sha256:beee9f30bc1f711043e78d4a2be0668955d4b761d587d6f60c2c8dc081efb203",
 							DiffID:        "sha256:24df0d4e20c0f42d3703bf1f1db2bdd77346c7956f74f423603d651e8e5ae8a7",
+							Size:          5590622,
+							LayerHistory: types.LayerHistory{
+								Created:   time.Time{},
+								CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+							},
 							Applications: []types.Application{
 								{
 									Type:     "composer",
@@ -134,6 +151,13 @@ func TestApplier_ApplyLayers(t *testing.T) {
 					Returns: cache.LocalArtifactCacheGetArtifactReturns{
 						ArtifactInfo: types.ArtifactInfo{
 							SchemaVersion: 1,
+							Architecture:  "amd64",
+							Author:        "",
+							Created:       time.Time{},
+							DockerVersion: "20.10.7",
+							Environment:   []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
+							ImageId:       "sha256:0c6a3a115682f3729fc5429a0d4b0fccc93fa82f4c39c95e74c2c895a9ff63ac",
+							Labels:        map[string]string{"maintainer": "John Smith ", "promoted": "true", "release-date": "2020-04-05", "version": "0.2"},
 						},
 					},
 				},
@@ -143,6 +167,13 @@ func TestApplier_ApplyLayers(t *testing.T) {
 					Family: "debian",
 					Name:   "9.9",
 				},
+				Architecture:  "amd64",
+				Author:        "",
+				Created:       time.Time{},
+				DockerVersion: "20.10.7",
+				Environment:   []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
+				ImageId:       "sha256:0c6a3a115682f3729fc5429a0d4b0fccc93fa82f4c39c95e74c2c895a9ff63ac",
+				Labels:        map[string]string{"maintainer": "John Smith ", "promoted": "true", "release-date": "2020-04-05", "version": "0.2"},
 				Packages: []types.Package{
 					{
 						Name: "libc6", Version: "2.24-11+deb9u4", SrcName: "glibc", SrcVersion: "2.24-11+deb9u4",
@@ -186,6 +217,37 @@ func TestApplier_ApplyLayers(t *testing.T) {
 						},
 					},
 				},
+				LayerMetadata: []types.LayerMetadata{
+					{
+						LayerDigest: "sha256:932da51564135c98a49a34a193d6cd363d8fa4184d957fde16c9d8527b3f3b02",
+						Size:        5590662,
+						LayerHistory: types.LayerHistory{
+							Author:    "",
+							Created:   time.Time{},
+							CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+							Comment:   "",
+						},
+					},
+					{
+						LayerDigest: "sha256:dffd9992ca398466a663c87c92cfea2a2db0ae0cf33fcb99da60eec52addbfc5",
+						Size:        5590645,
+						LayerHistory: types.LayerHistory{
+							Author:    "",
+							Created:   time.Time{},
+							CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+							Comment:   "",
+						},
+					}, {
+						LayerDigest: "sha256:beee9f30bc1f711043e78d4a2be0668955d4b761d587d6f60c2c8dc081efb203",
+						Size:        5590622,
+						LayerHistory: types.LayerHistory{
+							Author:    "",
+							Created:   time.Time{},
+							CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+							Comment:   "",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -209,6 +271,11 @@ func TestApplier_ApplyLayers(t *testing.T) {
 							OS: &types.OS{
 								Family: "alpine",
 								Name:   "3.10.4",
+							},
+							Size: 5590662,
+							LayerHistory: types.LayerHistory{
+								Created:   time.Time{},
+								CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
 							},
 							PackageInfos: []types.PackageInfo{
 								{
@@ -234,6 +301,13 @@ func TestApplier_ApplyLayers(t *testing.T) {
 					Returns: cache.LocalArtifactCacheGetArtifactReturns{
 						ArtifactInfo: types.ArtifactInfo{
 							SchemaVersion: 1,
+							Architecture:  "amd64",
+							Author:        "",
+							Created:       time.Time{},
+							DockerVersion: "20.10.7",
+							Environment:   []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
+							ImageId:       "sha256:0c6a3a115682f3729fc5429a0d4b0fccc93fa82f4c39c95e74c2c895a9ff63ac",
+							Labels:        map[string]string{"maintainer": "John Smith ", "promoted": "true", "release-date": "2020-04-05", "version": "0.2"},
 							HistoryPackages: []types.Package{
 								{Name: "musl", Version: "1.1.23"},
 								{Name: "busybox", Version: "1.31"},
@@ -253,6 +327,13 @@ func TestApplier_ApplyLayers(t *testing.T) {
 					Family: "alpine",
 					Name:   "3.10.4",
 				},
+				Architecture:  "amd64",
+				Author:        "",
+				Created:       time.Time{},
+				DockerVersion: "20.10.7",
+				Environment:   []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
+				ImageId:       "sha256:0c6a3a115682f3729fc5429a0d4b0fccc93fa82f4c39c95e74c2c895a9ff63ac",
+				Labels:        map[string]string{"maintainer": "John Smith ", "promoted": "true", "release-date": "2020-04-05", "version": "0.2"},
 				Packages: []types.Package{
 					{
 						Name:    "busybox",
@@ -304,6 +385,17 @@ func TestApplier_ApplyLayers(t *testing.T) {
 					{Name: "ncurses-terminfo", Version: "6.1_p20190518-r0"},
 					{Name: "bash", Version: "5.0.0-r0"},
 					{Name: "readline", Version: "8.0.0-r0"},
+				},
+				LayerMetadata: []types.LayerMetadata{{
+					LayerDigest: "sha256:a187dde48cd289ac374ad8539930628314bc581a481cdb41409c9289419ddb72",
+					Size:        5590662,
+					LayerHistory: types.LayerHistory{
+						Author:    "",
+						Created:   time.Time{},
+						CreatedBy: "/bin/sh -c #(nop) ADD file:f278386b0cef68136129f5f58c52445590a417b624d62bca158d4dc926c340df in / ",
+						Comment:   "",
+					},
+				},
 				},
 			},
 		},
@@ -541,7 +633,7 @@ func TestApplier_ApplyLayers(t *testing.T) {
 					return app.Libraries[i].Library.Name < app.Libraries[j].Library.Name
 				})
 			}
-			assert.Equal(t, tt.want, got)
+			assert.EqualValues(t, tt.want, got)
 			c.AssertExpectations(t)
 		})
 	}

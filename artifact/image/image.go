@@ -91,8 +91,21 @@ func (a Artifact) Inspect(ctx context.Context) (types.ArtifactReference, error) 
 		missingImageKey = ""
 	}
 
-	if err = a.inspect(ctx, missingImageKey, missingLayers, layerKeyMap); err != nil {
+	artifactInfo, layerHistoryMap, err := a.getArtifactConfig(imageID, diffIDs)
+	if err != nil {
+		return types.ArtifactReference{}, xerrors.Errorf("unable to analyze config: %w", err)
+	}
+
+	osFound, err := a.inspect(ctx, missingImageKey, missingLayers, layerKeyMap, layerHistoryMap)
+	if err != nil {
 		return types.ArtifactReference{}, xerrors.Errorf("analyze error: %w", err)
+	}
+
+	if missingImageKey != "" {
+		log.Logger.Debugf("Missing image cache: %s", missingImageKey)
+		if err := a.saveArtifact(missingImageKey, artifactInfo, osFound); err != nil {
+			return types.ArtifactReference{}, xerrors.Errorf("unable to save artifact: %w", err)
+		}
 	}
 
 	return types.ArtifactReference{
@@ -103,7 +116,6 @@ func (a Artifact) Inspect(ctx context.Context) (types.ArtifactReference, error) 
 		RepoTags:    a.image.RepoTags(),
 		RepoDigests: a.image.RepoDigests(),
 	}, nil
-
 }
 
 func (a Artifact) calcCacheKeys(imageID string, diffIDs []string) (string, []string, map[string]string, error) {
@@ -126,7 +138,9 @@ func (a Artifact) calcCacheKeys(imageID string, diffIDs []string) (string, []str
 	return imageKey, layerKeys, layerKeyMap, nil
 }
 
-func (a Artifact) inspect(ctx context.Context, missingImage string, layerKeys []string, layerKeyMap map[string]string) error {
+func (a Artifact) inspect(ctx context.Context, missingImageKey string, layerKeys []string, layerKeyMap map[string]string,
+	historyLayerMap map[string]types.LayerHistory) (types.OS, error) {
+
 	done := make(chan struct{})
 	errCh := make(chan error)
 
@@ -139,6 +153,7 @@ func (a Artifact) inspect(ctx context.Context, missingImage string, layerKeys []
 				errCh <- xerrors.Errorf("failed to analyze layer: %s : %w", diffID, err)
 				return
 			}
+			layerInfo.LayerHistory = historyLayerMap[diffID]
 			if err = a.cache.PutBlob(layerKey, layerInfo); err != nil {
 				errCh <- xerrors.Errorf("failed to store layer: %s in cache: %w", layerKey, err)
 				return
@@ -154,21 +169,12 @@ func (a Artifact) inspect(ctx context.Context, missingImage string, layerKeys []
 		select {
 		case <-done:
 		case err := <-errCh:
-			return err
+			return osFound, err
 		case <-ctx.Done():
-			return xerrors.Errorf("timeout: %w", ctx.Err())
+			return osFound, xerrors.Errorf("timeout: %w", ctx.Err())
 		}
 	}
-
-	if missingImage != "" {
-		log.Logger.Debugf("Missing image cache: %s", missingImage)
-		if err := a.inspectConfig(missingImage, osFound); err != nil {
-			return xerrors.Errorf("unable to analyze config: %w", err)
-		}
-	}
-
-	return nil
-
+	return osFound, nil
 }
 
 func (a Artifact) inspectLayer(ctx context.Context, diffID string) (types.BlobInfo, error) {
@@ -248,31 +254,55 @@ func (a Artifact) isCompressed(l v1.Layer) bool {
 	return !uncompressed
 }
 
-func (a Artifact) inspectConfig(imageID string, osFound types.OS) error {
+func (a Artifact) saveArtifact(imageID string, info types.ArtifactInfo, osFound types.OS) error {
 	configBlob, err := a.image.ConfigBlob()
 	if err != nil {
 		return xerrors.Errorf("unable to get config blob: %w", err)
 	}
-
-	pkgs := a.analyzer.AnalyzeImageConfig(osFound, configBlob)
-
-	var s1 v1.ConfigFile
-	if err := json.Unmarshal(configBlob, &s1); err != nil {
-		return xerrors.Errorf("json marshal error: %w", err)
-	}
-
-	info := types.ArtifactInfo{
-		SchemaVersion:   types.ArtifactJSONSchemaVersion,
-		Architecture:    s1.Architecture,
-		Created:         s1.Created.Time,
-		DockerVersion:   s1.DockerVersion,
-		OS:              s1.OS,
-		HistoryPackages: pkgs,
-	}
-
+	info.HistoryPackages = a.analyzer.AnalyzeImageConfig(osFound, configBlob)
 	if err := a.cache.PutArtifact(imageID, info); err != nil {
 		return xerrors.Errorf("failed to put image info into the cache: %w", err)
 	}
-
 	return nil
+}
+
+func (a Artifact) getArtifactConfig(imageID string, layerDiffs []string) (info types.ArtifactInfo, historyLayerMap map[string]types.LayerHistory, err error) {
+	configBlob, err := a.image.ConfigBlob()
+	if err != nil {
+		return info, nil, xerrors.Errorf("unable to get config blob: %w", err)
+	}
+
+	var s1 v1.ConfigFile
+	if err := json.Unmarshal(configBlob, &s1); err != nil {
+		return info, nil, xerrors.Errorf("json marshal error: %w", err)
+	}
+
+	info = types.ArtifactInfo{
+		SchemaVersion: types.ArtifactJSONSchemaVersion,
+		Architecture:  s1.Architecture,
+		Created:       s1.Created.Time,
+		DockerVersion: s1.DockerVersion,
+		OS:            s1.OS,
+		Author:        s1.Author,
+		ImageId:       imageID,
+		Environment:   s1.Config.Env,
+		Labels:        s1.Config.Labels,
+	}
+	// Indecies should match. Dont consider empty layers for now
+	historyLayerMap = make(map[string]types.LayerHistory)
+	var layerDiffId string
+	histIndex := 0
+	for _, configHistory := range s1.History {
+		if !configHistory.EmptyLayer {
+			layerDiffId = layerDiffs[histIndex]
+			historyLayerMap[layerDiffId] = types.LayerHistory{
+				Author:    configHistory.Author,
+				Created:   configHistory.Created.Time,
+				CreatedBy: configHistory.CreatedBy,
+				Comment:   configHistory.Comment,
+			}
+			histIndex++
+		}
+	}
+	return info, historyLayerMap, nil
 }

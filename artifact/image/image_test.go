@@ -3,12 +3,10 @@ package image_test
 import (
 	"context"
 	"errors"
+	depTypes "github.com/aquasecurity/go-dep-parser/pkg/types"
+	"golang.org/x/xerrors"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/xerrors"
 
 	"github.com/aquasecurity/fanal/analyzer"
 	_ "github.com/aquasecurity/fanal/analyzer/all"
@@ -17,7 +15,8 @@ import (
 	"github.com/aquasecurity/fanal/cache"
 	"github.com/aquasecurity/fanal/image"
 	"github.com/aquasecurity/fanal/types"
-	depTypes "github.com/aquasecurity/go-dep-parser/pkg/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestArtifact_Inspect(t *testing.T) {
@@ -75,10 +74,8 @@ func TestArtifact_Inspect(t *testing.T) {
 									{Name: "zlib", Version: "1.2.11-r3", SrcName: "zlib", SrcVersion: "1.2.11-r3"},
 								},
 							}},
-							Applications:  []types.Application(nil),
-							OpaqueDirs:    []string(nil),
-							WhiteoutFiles: []string(nil),
-							Size:          5591284,
+							Size:         5591284,
+							LayerHistory: types.LayerHistory{Author: "", Created: time.Date(2020, 3, 23, 21, 19, 34, 27725872, time.UTC), CreatedBy: "/bin/sh -c #(nop) ADD file:0c4555f363c2672e350001f1293e689875a3760afe7b3f9146886afe67121cba in / ", Comment: ""},
 						},
 					},
 					Returns: cache.ArtifactCachePutBlobReturns{},
@@ -94,6 +91,10 @@ func TestArtifact_Inspect(t *testing.T) {
 							Created:       time.Date(2020, 3, 23, 21, 19, 34, 196162891, time.UTC),
 							DockerVersion: "18.09.7",
 							OS:            "linux",
+							ImageId:       "sha256:a187dde48cd289ac374ad8539930628314bc581a481cdb41409c9289419ddb72",
+							Labels:        nil,
+							Environment:   []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
+							Author:        "",
 						},
 					},
 				},
@@ -140,6 +141,12 @@ func TestArtifact_Inspect(t *testing.T) {
 								Name:   "9.9",
 							},
 							Size: 1805109,
+							LayerHistory: types.LayerHistory{
+								Author:    "Bazel",
+								Created:   time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+								CreatedBy: "bazel build ...",
+								Comment:   "",
+							},
 							PackageInfos: []types.PackageInfo{
 								{
 									FilePath: "var/lib/dpkg/status.d/base",
@@ -191,6 +198,12 @@ func TestArtifact_Inspect(t *testing.T) {
 								},
 							},
 							Size: 15065777,
+							LayerHistory: types.LayerHistory{
+								Author:    "Bazel",
+								Created:   time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+								CreatedBy: "bazel build ...",
+								Comment:   "",
+							},
 						},
 					},
 				},
@@ -202,6 +215,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							Digest:        "",
 							DiffID:        "sha256:24df0d4e20c0f42d3703bf1f1db2bdd77346c7956f74f423603d651e8e5ae8a7",
 							Size:          27103,
+							LayerHistory: types.LayerHistory{
+								Author:    "",
+								Created:   time.Date(2020, 2, 16, 10, 38, 40, 976530082, time.UTC),
+								CreatedBy: "/bin/sh -c #(nop) COPY file:842584685f26edb24dc305d76894f51cfda2bad0c24a05e727f9d4905d184a70 in /php-app/composer.lock ",
+								Comment:   "",
+							},
 							Applications: []types.Application{{Type: "composer", FilePath: "php-app/composer.lock",
 								Libraries: []types.LibraryInfo{
 									{Library: depTypes.Library{Name: "guzzlehttp/guzzle", Version: "6.2.0"}},
@@ -293,6 +312,12 @@ func TestArtifact_Inspect(t *testing.T) {
 								"ruby-app/",
 							},
 							Size: 3619,
+							LayerHistory: types.LayerHistory{
+								Author:    "",
+								Created:   time.Date(2020, 2, 16, 10, 38, 41, 114114788, time.UTC),
+								CreatedBy: "/bin/sh -c #(nop) COPY file:c6d0373d380252b91829a5bb3c81d5b1afa574c91cef7752d18170a231c31f6d in /ruby-app/Gemfile.lock ",
+								Comment:   "",
+							},
 						},
 					},
 				},
@@ -341,6 +366,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							Digest:        "",
 							DiffID:        "sha256:932da51564135c98a49a34a193d6cd363d8fa4184d957fde16c9d8527b3f3b02",
 							Size:          1805109,
+							LayerHistory: types.LayerHistory{
+								Author:    "Bazel",
+								Created:   time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+								CreatedBy: "bazel build ...",
+								Comment:   "",
+							},
 						},
 					},
 				},
@@ -352,6 +383,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							Digest:        "",
 							DiffID:        "sha256:dffd9992ca398466a663c87c92cfea2a2db0ae0cf33fcb99da60eec52addbfc5",
 							Size:          15065777,
+							LayerHistory: types.LayerHistory{
+								Author:    "Bazel",
+								Created:   time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+								CreatedBy: "bazel build ...",
+								Comment:   "",
+							},
 						},
 					},
 				},
@@ -364,6 +401,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							DiffID:        "sha256:24df0d4e20c0f42d3703bf1f1db2bdd77346c7956f74f423603d651e8e5ae8a7",
 							OpaqueDirs:    []string{"php-app/"},
 							Size:          27103,
+							LayerHistory: types.LayerHistory{
+								Author:    "",
+								Created:   time.Date(2020, 2, 16, 10, 38, 40, 976530082, time.UTC),
+								CreatedBy: "/bin/sh -c #(nop) COPY file:842584685f26edb24dc305d76894f51cfda2bad0c24a05e727f9d4905d184a70 in /php-app/composer.lock ",
+								Comment:   "",
+							},
 						},
 					},
 				},
@@ -376,6 +419,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							DiffID:        "sha256:a4595c43a874856bf95f3bfc4fbf78bbaa04c92c726276d4f64193a47ced0566",
 							OpaqueDirs:    []string{"ruby-app/"},
 							Size:          3619,
+							LayerHistory: types.LayerHistory{
+								Author:    "",
+								Created:   time.Date(2020, 2, 16, 10, 38, 41, 114114788, time.UTC),
+								CreatedBy: "/bin/sh -c #(nop) COPY file:c6d0373d380252b91829a5bb3c81d5b1afa574c91cef7752d18170a231c31f6d in /ruby-app/Gemfile.lock ",
+								Comment:   "",
+							},
 						},
 					},
 				},
@@ -453,6 +502,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							OpaqueDirs:    []string(nil),
 							WhiteoutFiles: []string(nil),
 							Size:          5591284,
+							LayerHistory: types.LayerHistory{
+								Author:    "",
+								Created:   time.Date(2020, 3, 23, 21, 19, 34, 27725872, time.UTC),
+								CreatedBy: "/bin/sh -c #(nop) ADD file:0c4555f363c2672e350001f1293e689875a3760afe7b3f9146886afe67121cba in / ",
+								Comment:   "",
+							},
 						},
 					},
 					Returns: cache.ArtifactCachePutBlobReturns{
@@ -510,6 +565,12 @@ func TestArtifact_Inspect(t *testing.T) {
 							OpaqueDirs:    []string(nil),
 							WhiteoutFiles: []string(nil),
 							Size:          5591284,
+							LayerHistory: types.LayerHistory{
+								Author:    "",
+								Created:   time.Date(2020, 3, 23, 21, 19, 34, 27725872, time.UTC),
+								CreatedBy: "/bin/sh -c #(nop) ADD file:0c4555f363c2672e350001f1293e689875a3760afe7b3f9146886afe67121cba in / ",
+								Comment:   "",
+							},
 						},
 					},
 					Returns: cache.ArtifactCachePutBlobReturns{},
@@ -525,6 +586,8 @@ func TestArtifact_Inspect(t *testing.T) {
 							Created:       time.Date(2020, 3, 23, 21, 19, 34, 196162891, time.UTC),
 							DockerVersion: "18.09.7",
 							OS:            "linux",
+							ImageId:       "sha256:a187dde48cd289ac374ad8539930628314bc581a481cdb41409c9289419ddb72",
+							Environment:   []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
 						},
 					},
 					Returns: cache.ArtifactCachePutArtifactReturns{

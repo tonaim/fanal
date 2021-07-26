@@ -17,12 +17,18 @@ func NewApplier(c cache.LocalArtifactCache) Applier {
 
 func (a Applier) ApplyLayers(imageID string, diffIDs []string) (types.ArtifactDetail, error) {
 	var layers []types.BlobInfo
+	var layerMetadata []types.LayerMetadata
 	for _, diffID := range diffIDs {
 		layer, _ := a.cache.GetBlob(diffID)
 		if layer.SchemaVersion == 0 {
 			return types.ArtifactDetail{}, xerrors.Errorf("layer cache missing: %s", diffID)
 		}
 		layers = append(layers, layer)
+		layerMetadata = append(layerMetadata, types.LayerMetadata{
+			LayerDigest:  layer.Digest,
+			Size:         layer.Size,
+			LayerHistory: layer.LayerHistory,
+		})
 	}
 
 	mergedLayer := ApplyLayers(layers)
@@ -34,6 +40,14 @@ func (a Applier) ApplyLayers(imageID string, diffIDs []string) (types.ArtifactDe
 
 	imageInfo, _ := a.cache.GetArtifact(imageID)
 	mergedLayer.HistoryPackages = imageInfo.HistoryPackages
-
+	// Artifact Metadata details
+	mergedLayer.LayerMetadata = layerMetadata
+	mergedLayer.Created = imageInfo.Created
+	mergedLayer.DockerVersion = imageInfo.DockerVersion
+	mergedLayer.Architecture = imageInfo.Architecture
+	mergedLayer.ImageId = imageInfo.ImageId
+	mergedLayer.Environment = imageInfo.Environment
+	mergedLayer.Author = imageInfo.Author
+	mergedLayer.Labels = imageInfo.Labels
 	return mergedLayer, nil
 }
