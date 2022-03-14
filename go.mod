@@ -3,23 +3,27 @@ module github.com/aquasecurity/fanal
 go 1.16
 
 require (
+	cloud.google.com/go v0.99.0 // indirect
 	github.com/BurntSushi/toml v0.4.1
 	github.com/GoogleCloudPlatform/docker-credential-gcr v1.5.0
 	github.com/alicebob/miniredis/v2 v2.16.0
 	github.com/aquasecurity/cfsec v0.0.12
-	github.com/aquasecurity/defsec v0.0.30
+	github.com/aquasecurity/defsec v0.17.1
 	github.com/aquasecurity/go-dep-parser v0.0.0-20211110174639-8257534ffed3
 	github.com/aquasecurity/testdocker v0.0.0-20210911155206-e1e85f5a1516
-	github.com/aquasecurity/tfsec v0.59.0
 	github.com/aws/aws-sdk-go v1.42.0
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/docker/docker v20.10.10+incompatible
 	github.com/docker/go-connections v0.4.0
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-containerregistry v0.6.0
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-hclog v0.15.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+	github.com/hashicorp/go-hclog v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/hcl v1.0.0
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f
@@ -27,7 +31,8 @@ require (
 	github.com/knqyf263/go-rpmdb v0.0.0-20210911072402-73bd0ce46c49
 	github.com/knqyf263/nested v0.0.1
 	github.com/kylelemons/godebug v1.1.0
-	github.com/mitchellh/mapstructure v1.4.2
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/moby/buildkit v0.8.1
 	github.com/open-policy-agent/opa v0.34.0
 	github.com/opencontainers/go-digest v1.0.0
@@ -42,6 +47,9 @@ require (
 	go.uber.org/zap v1.19.1
 	golang.org/x/mod v0.5.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/term v0.0.0-20210503060354-a79de5458b56 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/grpc v1.42.0 // indirect
 	sigs.k8s.io/yaml v1.3.0
 )
